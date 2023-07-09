@@ -12,7 +12,13 @@ class CustomCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => IndivPage()));
+          context,
+          MaterialPageRoute(
+            builder: (context) => IndivPage(
+              chatmodel: chatmodel,
+            ),
+          ),
+        );
       },
       child: Column(
         children: [
@@ -21,13 +27,13 @@ class CustomCard extends StatelessWidget {
               radius: 25,
               backgroundColor: Colors.blueGrey,
               child: SvgPicture.asset(
-                chatmodel.isGroup ? "assets/groups.svg" : "assets/person.svg",
+                chatmodel.isGroup! ? "assets/groups.svg" : "assets/person.svg",
                 color: Colors.white,
                 height: 38,
                 width: 37,
               ),
             ),
-            trailing: Text(chatmodel.time),
+            trailing: Text(chatmodel.time!),
             subtitle: Row(
               children: [
                 Icon(Icons.done_all),
@@ -35,7 +41,7 @@ class CustomCard extends StatelessWidget {
                   width: 6,
                 ),
                 Text(
-                  chatmodel.currentMsg,
+                  chatmodel.currentMsg!,
                   style: TextStyle(fontSize: 13),
                 ),
               ],

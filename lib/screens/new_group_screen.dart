@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../customUI/contact_buttons.dart';
-import '../model/chatmodel.dart';
+import 'package:whatsapp_clone/customUI/avatar_card.dart';
+
 import '../customUI/contact_card.dart';
+import '../model/chatmodel.dart';
 
 class NewGroup extends StatefulWidget {
   const NewGroup({Key? key}) : super(key: key);
@@ -19,6 +20,8 @@ class _NewGroupState extends State<NewGroup> {
     Chatmodel(name: "Tanmay", status: "Flutter App Developer"),
     Chatmodel(name: "Tanmay", status: "Flutter App Developer"),
   ];
+  List<Chatmodel> groups = [];
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -37,14 +40,14 @@ class _NewGroupState extends State<NewGroup> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
               Text(
-                "Select Contact",
+                "New Group",
                 style: TextStyle(
                   fontSize: 18.5,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                "....",
+                "Add Participants",
                 style: TextStyle(
                   fontSize: 13,
                 ),
@@ -56,45 +59,73 @@ class _NewGroupState extends State<NewGroup> {
               onPressed: () {},
               icon: Icon(Icons.search),
             ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                print(value);
-              },
-              itemBuilder: (BuildContext context) {
-                return const [
-                  PopupMenuItem(
-                    value: "Invite a Friend",
-                    child: Text("Invite a Friend"),
-                  ),
-                  PopupMenuItem(
-                    value: "Contacts",
-                    child: Text("Contacts"),
-                  ),
-                  PopupMenuItem(
-                    value: "Refresh",
-                    child: Text("Refresh"),
-                  ),
-                  PopupMenuItem(
-                    value: "Help",
-                    child: Text("Help"),
-                  ),
-                ];
-              },
-            ),
           ],
         ),
-        // body: ListView(
-        //       children: const [
-        //         ContactButton(title: "New group", icon: Icons.group),
-        //         ContactButton(title: "New contact", icon: Icons.person_add),
-        //         ContactButton(title: "New Community", icon: Icons.group),
-        //       ],
-        //     ),
-        body:ListView.builder(
-          itemCount: contacts.length,
-          itemBuilder: (context, index) {
-            return ContactCard(chatmodel: contacts[index]);
-          },
+        body: Stack(
+          children: [
+            ListView.builder(
+              itemCount: contacts.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Container(
+                    height: groups.isNotEmpty ? 90 : 10,
+                  );
+                }
+                return InkWell(
+                  onTap: () {
+                    if (contacts[index - 1].selected == false) {
+                      setState(() {
+                        contacts[index - 1].selected = true;
+                        groups.add(contacts[index - 1]);
+                      });
+                    } else {
+                      setState(() {
+                        contacts[index - 1].selected = false;
+                        groups.remove(contacts[index - 1]);
+                      });
+                    }
+                  },
+                  child: ContactCard(
+                    chatmodel: contacts[index - 1],
+                  ),
+                );
+              },
+            ),
+            groups.isNotEmpty
+                ? Column(
+                    children: [
+                      Container(
+                        height: 75,
+                        color: Colors.white,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: contacts.length,
+                          itemBuilder: (context, index) {
+                            if (contacts[index].selected == true) {
+                              return InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    groups.remove(contacts[index]);
+                                    contacts[index].selected = false;
+                                  });
+                                },
+                                child: AvatarCard(
+                                  contact: contacts[index],
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          },
+                        ),
+                      ),
+                      const Divider(
+                        thickness: 1,
+                      ),
+                    ],
+                  )
+                : Container(),
+          ],
         ),
       ),
     );

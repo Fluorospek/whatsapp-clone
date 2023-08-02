@@ -1,12 +1,15 @@
+import 'dart:io';
+
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:whatsapp_clone/model/chatmodel.dart';
 import 'package:flutter_svg/svg.dart';
-import 'dart:io';
+import 'package:whatsapp_clone/model/chatmodel.dart';
+import 'package:whatsapp_clone/screens/camera_screen.dart';
 
 class IndivPage extends StatefulWidget {
   const IndivPage({Key? key, required this.chatmodel}) : super(key: key);
   final Chatmodel chatmodel;
+
   @override
   State<IndivPage> createState() => _IndivPageState();
 }
@@ -14,6 +17,7 @@ class IndivPage extends StatefulWidget {
 class _IndivPageState extends State<IndivPage> {
   final _textController = TextEditingController();
   bool _showEmoji = false;
+
   @override
   void dispose() {
     _textController.dispose();
@@ -44,7 +48,8 @@ class _IndivPageState extends State<IndivPage> {
         child: Scaffold(
           backgroundColor: Colors.blueAccent,
           appBar: AppBar(
-            leadingWidth: 70, //to increase the space for leading widgets
+            leadingWidth: 70,
+            //to increase the space for leading widgets
             titleSpacing: 5,
             backgroundColor: Color(0xFF075E54),
             leading: InkWell(
@@ -65,7 +70,8 @@ class _IndivPageState extends State<IndivPage> {
                     child: SvgPicture.asset(
                       widget.chatmodel.isGroup!
                           ? "assets/groups.svg"
-                          : "assets/person.svg", //always use widget parameter to access a variable defined in a stateless variable in a stateful state
+                          : "assets/person.svg",
+                      //always use widget parameter to access a variable defined in a stateless variable in a stateful state
                       color: Colors.white,
                       height: 38,
                       width: 37,
@@ -216,10 +222,20 @@ class _IndivPageState extends State<IndivPage> {
                                                                 .insert_drive_file,
                                                             Colors.indigo,
                                                             "Documents"),
-                                                        attach_icons(
-                                                            Icons.camera_alt,
-                                                            Colors.pink,
-                                                            "Camera"),
+                                                        InkWell(
+                                                          onTap: () {
+                                                            Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                    builder:
+                                                                        (builder) =>
+                                                                            CameraScreen()));
+                                                          },
+                                                          child: attach_icons(
+                                                              Icons.camera_alt,
+                                                              Colors.pink,
+                                                              "Camera"),
+                                                        ),
                                                         attach_icons(
                                                             Icons.insert_photo,
                                                             Colors.purple,
@@ -254,7 +270,13 @@ class _IndivPageState extends State<IndivPage> {
                                         icon: Icon(Icons.attach_file),
                                       ),
                                       IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      CameraScreen()));
+                                        },
                                         icon: Icon(Icons.camera_alt),
                                       ),
                                     ],

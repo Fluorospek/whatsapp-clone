@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:whatsapp_clone/screens/video_view.dart';
 
 import 'camera_view.dart';
 
@@ -15,8 +18,11 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   late CameraController _cameraController;
   late Future<void> cameraValue;
-
+  bool isRecording = false;
   XFile? pictureFile;
+  bool flash = false;
+  bool isCameraFront = false;
+  double transform = 0;
 
   @override
   void initState() {
@@ -43,7 +49,10 @@ class _CameraScreenState extends State<CameraScreen> {
               future: cameraValue,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  return CameraPreview(_cameraController);
+                  return Container(
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      child: CameraPreview(_cameraController));
                 } else {
                   return const Center(
                     child: CircularProgressIndicator(),
@@ -64,29 +73,75 @@ class _CameraScreenState extends State<CameraScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.flash_off,
+                          onPressed: () {
+                            setState(() {
+                              flash = !flash;
+                              flash
+                                  ? _cameraController
+                                      .setFlashMode(FlashMode.torch)
+                                  : _cameraController
+                                      .setFlashMode(FlashMode.off);
+                            });
+                          },
+                          icon: Icon(
+                            flash ? Icons.flash_off : Icons.flash_on,
                             color: Colors.white,
                             size: 28,
                           ),
                         ),
-                        InkWell(
-                          onTap: () {
-                            takePhoto(context);
+                        GestureDetector(
+                          onLongPress: () async {
+                            final vid =
+                                await _cameraController.startVideoRecording();
+                            setState(() {
+                              isRecording = true;
+                            });
                           },
-                          child: const Icon(
-                            Icons.panorama_fish_eye,
-                            color: Colors.white,
-                            size: 70,
-                          ),
+                          onLongPressUp: () async {
+                            XFile videoFile =
+                                await _cameraController.stopVideoRecording();
+                            setState(() {
+                              isRecording = false;
+                            });
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (builder) => VideoViewScreen(
+                                        videoPath: videoFile.path)));
+                          },
+                          onTap: () {
+                            if (!isRecording) takePhoto(context);
+                          },
+                          child: isRecording
+                              ? const Icon(
+                                  Icons.radio_button_on,
+                                  color: Colors.red,
+                                  size: 70,
+                                )
+                              : const Icon(
+                                  Icons.panorama_fish_eye,
+                                  color: Colors.white,
+                                  size: 70,
+                                ),
                         ),
                         IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.flip_camera_ios,
-                            color: Colors.white,
-                            size: 28,
+                          onPressed: () async {
+                            setState(() {
+                              isCameraFront = !isCameraFront;
+                              transform = transform + pi;
+                            });
+                            int cameraPos = isCameraFront ? 0 : 1;
+                            _cameraController = CameraController(
+                                camera![cameraPos], ResolutionPreset.high);
+                            cameraValue = _cameraController.initialize();
+                          },
+                          icon: Transform.rotate(
+                            angle: transform,
+                            child: Icon(
+                              Icons.flip_camera_ios,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                           ),
                         ),
                       ],

@@ -28,7 +28,21 @@ class _IndivPageState extends State<IndivPage> {
     super.dispose();
   }
 
-  void connect() {socket=IO.io(uri)}
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    connect();
+  }
+
+  void connect() {
+    socket = IO.io("http://192.168.1.33:5000", <String, dynamic>{
+      "transport": ["websocket"],
+      "autoConnect": false,
+    });
+    socket.connect();
+    socket.onConnect((data) => print("Connected"));
+  }
 
   @override
   Widget build(BuildContext context) {

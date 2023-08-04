@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:whatsapp_clone/customUI/own_msg_box.dart';
+import 'package:whatsapp_clone/customUI/reply_card.dart';
 import 'package:whatsapp_clone/model/chatmodel.dart';
 import 'package:whatsapp_clone/screens/camera_screen.dart';
 
@@ -17,12 +20,15 @@ class IndivPage extends StatefulWidget {
 class _IndivPageState extends State<IndivPage> {
   final _textController = TextEditingController();
   bool _showEmoji = false;
+  late IO.Socket socket;
 
   @override
   void dispose() {
     _textController.dispose();
     super.dispose();
   }
+
+  void connect() {socket=IO.io(uri)}
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +156,34 @@ class _IndivPageState extends State<IndivPage> {
             width: MediaQuery.of(context).size.width,
             child: Stack(
               children: [
-                ListView(),
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      OwnBox(),
+                      ReplyBox(),
+                      OwnBox(),
+                      ReplyBox(),
+                      OwnBox(),
+                      ReplyBox(),
+                      OwnBox(),
+                      ReplyBox(),
+                      OwnBox(),
+                      ReplyBox(),
+                      OwnBox(),
+                      ReplyBox(),
+                      OwnBox(),
+                      ReplyBox(),
+                      OwnBox(),
+                      ReplyBox(),
+                      OwnBox(),
+                      ReplyBox(),
+                      OwnBox(),
+                      ReplyBox(),
+                    ],
+                  ),
+                ),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Column(

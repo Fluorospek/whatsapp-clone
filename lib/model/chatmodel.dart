@@ -6,14 +6,15 @@ class Chatmodel {
   String? currentMsg;
   String? status;
   bool selected = false;
+  int? id;
 
-  Chatmodel({
-    required this.name,
-    this.icon,
-    this.isGroup,
-    this.time,
-    this.currentMsg,
-    this.status,
-    this.selected = false,
-  });
+  Chatmodel(
+      {required this.name,
+      this.icon,
+      this.isGroup,
+      this.time,
+      this.currentMsg,
+      this.status,
+      this.selected = false,
+      this.id});
 }

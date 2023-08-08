@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ReplyBox extends StatelessWidget {
-  const ReplyBox({super.key});
+  const ReplyBox({super.key, required this.message,required this.time});
+  final String message;
+  final String time;
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

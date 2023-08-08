@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:whatsapp_clone/screens/idiv_page.dart';
+
 import '../model/chatmodel.dart';
 
 class CustomCard extends StatelessWidget {
-  const CustomCard({Key? key, required this.chatmodel}) : super(key: key);
+  const CustomCard({Key? key, required this.chatmodel, required this.source})
+      : super(key: key);
   final Chatmodel chatmodel;
+  final Chatmodel source;
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +19,7 @@ class CustomCard extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => IndivPage(
               chatmodel: chatmodel,
+              source: source,
             ),
           ),
         );

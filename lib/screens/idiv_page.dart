@@ -4,14 +4,18 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:whatsapp_clone/customUI/own_msg_box.dart';
-import 'package:whatsapp_clone/customUI/reply_card.dart';
 import 'package:whatsapp_clone/model/chatmodel.dart';
 import 'package:whatsapp_clone/screens/camera_screen.dart';
 
+import '../customUI/own_msg_box.dart';
+import '../customUI/reply_card.dart';
+import '../model/message_model.dart';
+
 class IndivPage extends StatefulWidget {
-  const IndivPage({Key? key, required this.chatmodel}) : super(key: key);
+  const IndivPage({Key? key, required this.chatmodel, required this.source})
+      : super(key: key);
   final Chatmodel chatmodel;
+  final Chatmodel source;
 
   @override
   State<IndivPage> createState() => _IndivPageState();
@@ -21,6 +25,9 @@ class _IndivPageState extends State<IndivPage> {
   final _textController = TextEditingController();
   bool _showEmoji = false;
   late IO.Socket socket;
+  bool sendButton = false;
+  List<MessageModel> messages = [];
+  ScrollController _scrollController = ScrollController();
 
   @override
   void dispose() {
@@ -37,11 +44,40 @@ class _IndivPageState extends State<IndivPage> {
 
   void connect() {
     socket = IO.io("http://192.168.1.33:5000", <String, dynamic>{
-      "transport": ["websocket"],
+      "transports": ["websocket"],
       "autoConnect": false,
     });
     socket.connect();
-    socket.onConnect((data) => print("Connected"));
+    socket.onConnect((data) {
+      print("Connected");
+      socket.on("message", (data) {
+        print(data);
+        setMsg("destination", data["message"]);
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    });
+    print(socket.connected);
+    socket.emit("signin", widget.source.id);
+  }
+
+  void sendMsg(String msg, int sourceID, int targetID) {
+    setMsg("source", msg);
+    socket.emit(
+        "message", {"message": msg, "source": sourceID, "target": targetID});
+  }
+
+  void setMsg(String type, String msg) {
+    MessageModel messageModel = MessageModel(
+        type: type,
+        message: msg,
+        time: DateTime.now().toString().substring(10, 16));
+    setState(() {
+      messages.add(messageModel);
+    });
   }
 
   @override
@@ -168,34 +204,31 @@ class _IndivPageState extends State<IndivPage> {
           body: Container(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
-            child: Stack(
+            child: Column(
               children: [
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  child: ListView(
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
                     shrinkWrap: true,
-                    children: [
-                      OwnBox(),
-                      ReplyBox(),
-                      OwnBox(),
-                      ReplyBox(),
-                      OwnBox(),
-                      ReplyBox(),
-                      OwnBox(),
-                      ReplyBox(),
-                      OwnBox(),
-                      ReplyBox(),
-                      OwnBox(),
-                      ReplyBox(),
-                      OwnBox(),
-                      ReplyBox(),
-                      OwnBox(),
-                      ReplyBox(),
-                      OwnBox(),
-                      ReplyBox(),
-                      OwnBox(),
-                      ReplyBox(),
-                    ],
+                    itemCount: messages.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == messages.length) {
+                        return Container(
+                          height: 70,
+                        );
+                      }
+                      if (messages[index].type == "source") {
+                        return OwnBox(
+                          message: messages[index].message!,
+                          time: messages[index].time!,
+                        );
+                      } else {
+                        return ReplyBox(
+                          message: messages[index].message!,
+                          time: messages[index].time!,
+                        );
+                      }
+                    },
                   ),
                 ),
                 Align(
@@ -218,6 +251,17 @@ class _IndivPageState extends State<IndivPage> {
                                 keyboardType: TextInputType.multiline,
                                 maxLines: 5,
                                 minLines: 1,
+                                onChanged: (value) {
+                                  if (value.length > 0) {
+                                    setState(() {
+                                      sendButton = true;
+                                    });
+                                  } else {
+                                    setState(() {
+                                      sendButton = false;
+                                    });
+                                  }
+                                },
                                 onTap: () {
                                   FocusScope.of(context).unfocus();
                                   if (_showEmoji == true) _showEmoji = false;
@@ -269,20 +313,10 @@ class _IndivPageState extends State<IndivPage> {
                                                                 .insert_drive_file,
                                                             Colors.indigo,
                                                             "Documents"),
-                                                        InkWell(
-                                                          onTap: () {
-                                                            Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder:
-                                                                        (builder) =>
-                                                                            CameraScreen()));
-                                                          },
-                                                          child: attach_icons(
-                                                              Icons.camera_alt,
-                                                              Colors.pink,
-                                                              "Camera"),
-                                                        ),
+                                                        attach_icons(
+                                                            Icons.camera_alt,
+                                                            Colors.pink,
+                                                            "Camera"),
                                                         attach_icons(
                                                             Icons.insert_photo,
                                                             Colors.purple,
@@ -339,8 +373,29 @@ class _IndivPageState extends State<IndivPage> {
                               backgroundColor: Color(0xFF075E54),
                               radius: 25,
                               child: IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.mic),
+                                onPressed: () {
+                                  if (sendButton) {
+                                    _scrollController.animateTo(
+                                      _scrollController
+                                          .position.maxScrollExtent,
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut,
+                                    );
+                                    sendMsg(
+                                      _textController.text,
+                                      widget.source.id!,
+                                      widget.chatmodel.id!,
+                                    );
+                                    _textController.clear();
+                                    setState(() {
+                                      sendButton = false;
+                                    });
+                                  }
+                                },
+                                icon: Icon(
+                                  sendButton ? Icons.send : Icons.mic,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
@@ -372,7 +427,12 @@ class _IndivPageState extends State<IndivPage> {
 
   Widget attach_icons(IconData icon, Color color, String text) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        if (text == "Camera") {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (builder) => CameraScreen()));
+        }
+      },
       child: Column(
         children: [
           Padding(

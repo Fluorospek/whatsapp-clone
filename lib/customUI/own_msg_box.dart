@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class OwnBox extends StatelessWidget {
-  const OwnBox({super.key});
+  const OwnBox({super.key, required this.message, required this.time});
+  final String message;
+  final String time;
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -29,7 +31,7 @@ class OwnBox extends StatelessWidget {
                   bottom: 25,
                 ),
                 child: Text(
-                  "Hey",
+                  message,
                   style: TextStyle(
                     fontSize: 16,
                   ),
@@ -41,7 +43,7 @@ class OwnBox extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      "20:48",
+                      time,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey[600],

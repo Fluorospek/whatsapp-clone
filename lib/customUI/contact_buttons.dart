@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../screens/new_group_screen.dart';
-
 class ContactButton extends StatelessWidget {
   const ContactButton({Key? key, required this.title, required this.icon})
       : super(key: key);
@@ -10,23 +8,17 @@ class ContactButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (builder) => NewGroup()));
-      },
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.green,
-          child: Icon(
-            icon,
-            color: Colors.white,
-          ),
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: Colors.green,
+        child: Icon(
+          icon,
+          color: Colors.white,
         ),
-        title: Text(
-          title,
-          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
-        ),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
       ),
     );
   }

@@ -43,12 +43,11 @@ class _IndivPageState extends State<IndivPage> {
   }
 
   void connect() {
-    socket = IO.io(
-        "https://superb-genie-f268ba.netlify.app/.netlify/functions/index",
-        <String, dynamic>{
-          "transports": ["websocket"],
-          "autoConnect": false,
-        });
+    socket =
+        IO.io("https://whatsapp-clone-rmsb.onrender.com/", <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+    });
     socket.connect();
     socket.onConnect((data) {
       print("Connected");

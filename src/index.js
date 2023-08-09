@@ -8,9 +8,9 @@ const router = express.Router();
 
 var server = http.createServer(app);
 
-router.get("/", (req, res) => {
-  return res.json("Hello World");
-});
+// router.get("/", (req, res) => {
+//   return res.json("Hello World");
+// });
 
 var io = require("socket.io")(server, {
   cors: {
@@ -40,6 +40,6 @@ server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-app.use("/.netlify/functions/index", router);
+// app.use("/.netlify/functions/index", router);
 
 // module.exports.handler = serverless(app);

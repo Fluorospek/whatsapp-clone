@@ -9,7 +9,7 @@ const router = express.Router();
 var server = http.createServer(app);
 
 router.get("/", (req, res) => {
-  res.json({ message: "Hello World!" });
+  return res.json("Hello World");
 });
 
 var io = require("socket.io")(server, {

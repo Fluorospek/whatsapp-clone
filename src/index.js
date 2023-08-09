@@ -8,10 +8,6 @@ const router = express.Router();
 
 var server = http.createServer(app);
 
-router.get("/", (req, res) => {
-  return res.json("Hello World");
-});
-
 var io = require("socket.io")(server, {
   cors: {
     origin: "*",
@@ -41,5 +37,9 @@ server.listen(port, "0.0.0.0", () => {
 });
 
 app.use("/.netlify/functions/index", router);
+
+router.get("/", (req, res) => {
+  res.json("Hello World");
+});
 
 module.exports.handler = serverless(app);

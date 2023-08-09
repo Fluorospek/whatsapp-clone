@@ -43,10 +43,12 @@ class _IndivPageState extends State<IndivPage> {
   }
 
   void connect() {
-    socket = IO.io("http://192.168.1.33:5000", <String, dynamic>{
-      "transports": ["websocket"],
-      "autoConnect": false,
-    });
+    socket = IO.io(
+        "https://superb-genie-f268ba.netlify.app/.netlify/functions/index",
+        <String, dynamic>{
+          "transports": ["websocket"],
+          "autoConnect": false,
+        });
     socket.connect();
     socket.onConnect((data) {
       print("Connected");

@@ -49,6 +49,8 @@ class _IndivPageState extends State<IndivPage> {
       "autoConnect": false,
     });
     socket.connect();
+    print(socket.connected);
+    socket.emit("signin", widget.source.id);
     socket.onConnect((data) {
       print("Connected");
       socket.on("message", (data) {
@@ -61,8 +63,6 @@ class _IndivPageState extends State<IndivPage> {
         );
       });
     });
-    print(socket.connected);
-    socket.emit("signin", widget.source.id);
   }
 
   void sendMsg(String msg, int sourceID, int targetID) {
@@ -77,7 +77,9 @@ class _IndivPageState extends State<IndivPage> {
         message: msg,
         time: DateTime.now().toString().substring(10, 16));
     setState(() {
-      messages.add(messageModel);
+      setState(() {
+        messages.add(messageModel);
+      });
     });
   }
 
@@ -223,12 +225,13 @@ class _IndivPageState extends State<IndivPage> {
                           message: messages[index].message!,
                           time: messages[index].time!,
                         );
-                      } else {
+                      } else if (messages[index].type == "destination") {
                         return ReplyBox(
                           message: messages[index].message!,
                           time: messages[index].time!,
                         );
-                      }
+                      } else
+                        return Container();
                     },
                   ),
                 ),

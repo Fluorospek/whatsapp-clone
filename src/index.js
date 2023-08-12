@@ -27,12 +27,12 @@ io.on("connection", (socket) => {
   console.log(socket.id, "has joined");
   socket.on("signin", (id) => {
     console.log(id);
-    clients[id] = socket.id;
+    clients[id] = socket;
   });
   socket.on("message", (data) => {
     console.log(data);
     let targetID = data.targetID;
-    if (clients[targetID]) socket.emit("message", data);
+    if (clients[targetID]) clients[targetID].emit("message", data);
   });
 });
 

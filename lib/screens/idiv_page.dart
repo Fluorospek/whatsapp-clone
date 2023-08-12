@@ -67,8 +67,8 @@ class _IndivPageState extends State<IndivPage> {
 
   void sendMsg(String msg, int sourceID, int targetID) {
     setMsg("source", msg);
-    socket.emit(
-        "message", {"message": msg, "source": sourceID, "target": targetID});
+    socket.emit("message",
+        {"message": msg, "sourceID": sourceID, "targetID": targetID});
   }
 
   void setMsg(String type, String msg) {
@@ -76,10 +76,9 @@ class _IndivPageState extends State<IndivPage> {
         type: type,
         message: msg,
         time: DateTime.now().toString().substring(10, 16));
+    print(messageModel);
     setState(() {
-      setState(() {
-        messages.add(messageModel);
-      });
+      messages.add(messageModel);
     });
   }
 
@@ -225,13 +224,12 @@ class _IndivPageState extends State<IndivPage> {
                           message: messages[index].message!,
                           time: messages[index].time!,
                         );
-                      } else if (messages[index].type == "destination") {
+                      } else {
                         return ReplyBox(
                           message: messages[index].message!,
                           time: messages[index].time!,
                         );
-                      } else
-                        return Container();
+                      }
                     },
                   ),
                 ),

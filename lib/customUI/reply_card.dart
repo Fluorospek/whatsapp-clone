@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ReplyBox extends StatelessWidget {
-  const ReplyBox({super.key, required this.message,required this.time});
+  const ReplyBox({super.key, required this.message, required this.time});
   final String message;
   final String time;
   @override
@@ -31,7 +31,7 @@ class ReplyBox extends StatelessWidget {
                   bottom: 25,
                 ),
                 child: Text(
-                  "Hey",
+                  message,
                   style: TextStyle(
                     fontSize: 16,
                   ),
@@ -41,7 +41,7 @@ class ReplyBox extends StatelessWidget {
                 bottom: 4,
                 right: 10,
                 child: Text(
-                  "20:48",
+                  time,
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey[600],

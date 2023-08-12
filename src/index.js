@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
   socket.on("message", (data) => {
     console.log(data);
     let targetID = data.targetID;
-    if (clients[targetID]) clients[targetID].emit("message", data);
+    if (clients[targetID]) socket.emit("message", data);
   });
 });
 

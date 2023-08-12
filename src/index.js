@@ -31,7 +31,7 @@ io.on("connection", (socket) => {
   });
   socket.on("message", (data) => {
     console.log(data);
-    let targetID = data.targetID;
+    let targetID = data.target;
     if (clients[targetID]) clients[targetID].emit("message", data);
   });
 });

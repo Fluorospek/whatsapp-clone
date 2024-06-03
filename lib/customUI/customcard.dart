@@ -40,9 +40,12 @@ class CustomCard extends StatelessWidget {
             trailing: Text(chatmodel.time!),
             subtitle: Row(
               children: [
-                Icon(Icons.done_all),
+                Icon(
+                  Icons.done_all,
+                  size: 20,
+                ),
                 SizedBox(
-                  width: 6,
+                  width: 4,
                 ),
                 Text(
                   chatmodel.currentMsg!,
@@ -53,8 +56,8 @@ class CustomCard extends StatelessWidget {
             title: Text(
               chatmodel.name,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                fontSize: 18,
               ),
             ),
           ),

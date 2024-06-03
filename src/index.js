@@ -21,6 +21,9 @@ var io = require("socket.io")(server, {
 app.use(cors());
 app.use(express.json());
 var clients = {};
+const routes = require("./routes");
+
+app.use("/routes", routes);
 
 io.on("connection", (socket) => {
   console.log("Connected");

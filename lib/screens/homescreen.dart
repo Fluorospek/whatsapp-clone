@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:whatsapp_clone/pages/call_page.dart';
 import 'package:whatsapp_clone/pages/camera_page.dart';
 import 'package:whatsapp_clone/pages/chat_page.dart';
 import 'package:whatsapp_clone/pages/status_page.dart';
@@ -87,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen>
               source: widget.source,
             ),
             StatusPage(),
-            Text("calls")
+            CallPage(),
           ],
         ),
       ),

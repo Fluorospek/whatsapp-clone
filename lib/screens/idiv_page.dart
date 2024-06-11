@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:whatsapp_clone/customUI/replyfilecard.dart';
 import 'package:whatsapp_clone/model/chatmodel.dart';
 import 'package:whatsapp_clone/screens/camera_screen.dart';
 import 'package:whatsapp_clone/screens/camera_view.dart';
@@ -33,6 +36,8 @@ class _IndivPageState extends State<IndivPage> {
   ScrollController _scrollController = ScrollController();
   ImagePicker _picker = ImagePicker();
   XFile? file;
+  int popTime = 0;
+
   @override
   void dispose() {
     _textController.dispose();
@@ -47,11 +52,13 @@ class _IndivPageState extends State<IndivPage> {
   }
 
   void connect() {
-    socket =
-        IO.io("https://whatsapp-clone-rmsb.onrender.com/", <String, dynamic>{
-      "transports": ["websocket"],
-      "autoConnect": false,
-    });
+    socket = IO.io(
+      "http://192.168.0.166:7000/",
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .disableAutoConnect()
+          .build(),
+    );
     socket.connect();
     print(socket.connected);
     socket.emit("signin", widget.source.id);
@@ -97,21 +104,22 @@ class _IndivPageState extends State<IndivPage> {
   }
 
   void sendImage(String path, String msg) async {
-    print("Its working,$msg");
-    // var req = http.MultipartRequest(
-    //   "POST",
-    //   Uri.parse("http://192.168.0.1:5000/routes/addimage"),
-    // );
-    // req.files.add(
-    //   await http.MultipartFile.fromPath("img", path),
-    // );
-    // req.headers.addAll({
-    //   "Content-type": "multipart/form-data",
-    // });
-    // http.StreamedResponse res = await req.send();
-    // var httpResponse = await http.Response.fromStream(res);
-    // var data = json.decode(httpResponse.body);
-    // print(data['path']);
+    print("Its working,$path");
+    var req = http.MultipartRequest(
+      "POST",
+      Uri.parse("http://192.168.0.166:7000/routes/addimage"),
+    );
+    req.files.add(
+      await http.MultipartFile.fromPath("img", path),
+    );
+    req.headers.addAll({
+      "Content-type": "multipart/form-data",
+    });
+    http.StreamedResponse res = await req.send();
+    print(res.statusCode);
+    var httpResponse = await http.Response.fromStream(res);
+    var data = json.decode(httpResponse.body);
+    print(data['path']);
     setMsg("source", msg, path);
     socket.emit("message", {
       "message": msg,
@@ -119,6 +127,7 @@ class _IndivPageState extends State<IndivPage> {
       "targetID": widget.chatmodel.id,
       "path": path,
     });
+    Navigator.popUntil(context, ModalRoute.withName('indivpage'));
   }
 
   @override
@@ -272,10 +281,18 @@ class _IndivPageState extends State<IndivPage> {
                           );
                         }
                       } else {
-                        return ReplyBox(
-                          message: messages[index].message!,
-                          time: messages[index].time!,
-                        );
+                        if (messages[index].path != "") {
+                          return ReplyFileCard(
+                            path: messages[index].path,
+                            message: messages[index].message,
+                            time: messages[index].time,
+                          );
+                        } else {
+                          return ReplyBox(
+                            message: messages[index].message!,
+                            time: messages[index].time!,
+                          );
+                        }
                       }
                     },
                   ),
@@ -367,6 +384,9 @@ class _IndivPageState extends State<IndivPage> {
                                                             Icons.camera_alt,
                                                             Colors.pink,
                                                             "Camera", () {
+                                                          setState(() {
+                                                            popTime = 3;
+                                                          });
                                                           Navigator.push(
                                                             context,
                                                             MaterialPageRoute(
@@ -386,30 +406,35 @@ class _IndivPageState extends State<IndivPage> {
                                                             Colors.purple,
                                                             "Gallery",
                                                             () async {
+                                                          setState(() {
+                                                            popTime = 2;
+                                                          });
                                                           file = await _picker
                                                               .pickImage(
                                                                   source: ImageSource
                                                                       .gallery);
-                                                          if(file!=null){
+                                                          if (file != null) {
                                                             Navigator.push(
                                                               context,
                                                               MaterialPageRoute(
-                                                                builder: (builder) =>
-                                                                    CameraViewScreen(
-                                                                      imagePath:
-                                                                      file!.path,
-                                                                      onImageSend:
+                                                                builder:
+                                                                    (builder) =>
+                                                                        CameraViewScreen(
+                                                                  imagePath:
+                                                                      file!
+                                                                          .path,
+                                                                  onImageSend:
                                                                       sendImage,
-                                                                    ),
+                                                                ),
                                                                 settings:
-                                                                const RouteSettings(
-                                                                    name:
-                                                                    'cameraview'),
+                                                                    const RouteSettings(
+                                                                        name:
+                                                                            'cameraview'),
                                                               ),
                                                             );
-                                                          }
-                                                          else{
-                                                            print("No file selected");
+                                                          } else {
+                                                            print(
+                                                                "No file selected");
                                                           }
                                                         }),
                                                       ],
@@ -446,6 +471,9 @@ class _IndivPageState extends State<IndivPage> {
                                       ),
                                       IconButton(
                                         onPressed: () {
+                                          setState(() {
+                                            popTime = 2;
+                                          });
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 class ReplyFileCard extends StatelessWidget {
@@ -31,8 +29,8 @@ class ReplyFileCard extends StatelessWidget {
                     topLeft: Radius.circular(10),
                     topRight: Radius.circular(10),
                   ),
-                  child: Image.file(
-                    File(path!),
+                  child: Image.network(
+                    "http://192.168.0.166:7000/uploads/$path",
                     fit: BoxFit.fill,
                   ),
                 ),

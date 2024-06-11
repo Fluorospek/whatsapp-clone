@@ -87,8 +87,7 @@ class CameraViewScreen extends StatelessWidget {
                     suffixIcon: InkWell(
                       onTap: () {
                         onImageSend!(imagePath, _controller.text);
-                        Navigator.popUntil(
-                            context, ModalRoute.withName('indivpage'));
+
                         _controller.clear();
                       },
                       child: CircleAvatar(

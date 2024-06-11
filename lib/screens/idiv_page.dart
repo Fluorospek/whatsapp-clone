@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:whatsapp_clone/model/chatmodel.dart';
 import 'package:whatsapp_clone/screens/camera_screen.dart';
+import 'package:whatsapp_clone/screens/camera_view.dart';
 
 import '../customUI/own_msg_box.dart';
+import '../customUI/ownfilecard.dart';
 import '../customUI/reply_card.dart';
 import '../model/message_model.dart';
 
@@ -28,7 +31,8 @@ class _IndivPageState extends State<IndivPage> {
   bool sendButton = false;
   List<MessageModel> messages = [];
   ScrollController _scrollController = ScrollController();
-
+  ImagePicker _picker = ImagePicker();
+  XFile? file;
   @override
   void dispose() {
     _textController.dispose();
@@ -55,7 +59,11 @@ class _IndivPageState extends State<IndivPage> {
       print("Connected");
       socket.on("message", (data) {
         print(data);
-        setMsg("destination", data["message"]);
+        setMsg(
+          "destination",
+          data["message"],
+          data["path"],
+        );
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: Duration(milliseconds: 300),
@@ -65,20 +73,51 @@ class _IndivPageState extends State<IndivPage> {
     });
   }
 
-  void sendMsg(String msg, int sourceID, int targetID) {
-    setMsg("source", msg);
-    socket.emit("message",
-        {"message": msg, "sourceID": sourceID, "targetID": targetID});
+  void sendMsg(String msg, int sourceID, int targetID, String path) {
+    setMsg("source", msg, path);
+    socket.emit("message", {
+      "message": msg,
+      "sourceID": sourceID,
+      "targetID": targetID,
+      "path": path
+    });
   }
 
-  void setMsg(String type, String msg) {
+  void setMsg(String type, String msg, String path) {
+    print("message set");
     MessageModel messageModel = MessageModel(
         type: type,
         message: msg,
-        time: DateTime.now().toString().substring(10, 16));
+        time: DateTime.now().toString().substring(10, 16),
+        path: path);
     print(messageModel);
     setState(() {
       messages.add(messageModel);
+    });
+  }
+
+  void sendImage(String path, String msg) async {
+    print("Its working,$msg");
+    // var req = http.MultipartRequest(
+    //   "POST",
+    //   Uri.parse("http://192.168.0.1:5000/routes/addimage"),
+    // );
+    // req.files.add(
+    //   await http.MultipartFile.fromPath("img", path),
+    // );
+    // req.headers.addAll({
+    //   "Content-type": "multipart/form-data",
+    // });
+    // http.StreamedResponse res = await req.send();
+    // var httpResponse = await http.Response.fromStream(res);
+    // var data = json.decode(httpResponse.body);
+    // print(data['path']);
+    setMsg("source", msg, path);
+    socket.emit("message", {
+      "message": msg,
+      "sourceID": widget.source.id,
+      "targetID": widget.chatmodel.id,
+      "path": path,
     });
   }
 
@@ -220,10 +259,18 @@ class _IndivPageState extends State<IndivPage> {
                         );
                       }
                       if (messages[index].type == "source") {
-                        return OwnBox(
-                          message: messages[index].message!,
-                          time: messages[index].time!,
-                        );
+                        if (messages[index].path != "") {
+                          return OwnFileCard(
+                            path: messages[index].path,
+                            message: messages[index].message,
+                            time: messages[index].time,
+                          );
+                        } else {
+                          return OwnBox(
+                            message: messages[index].message!,
+                            time: messages[index].time!,
+                          );
+                        }
                       } else {
                         return ReplyBox(
                           message: messages[index].message!,
@@ -314,15 +361,57 @@ class _IndivPageState extends State<IndivPage> {
                                                             Icons
                                                                 .insert_drive_file,
                                                             Colors.indigo,
-                                                            "Documents"),
+                                                            "Documents",
+                                                            () {}),
                                                         attach_icons(
                                                             Icons.camera_alt,
                                                             Colors.pink,
-                                                            "Camera"),
+                                                            "Camera", () {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (builder) =>
+                                                                  CameraScreen(
+                                                                      sendImage:
+                                                                          sendImage),
+                                                              settings:
+                                                                  RouteSettings(
+                                                                      name:
+                                                                          'camerascreen'),
+                                                            ),
+                                                          );
+                                                        }),
                                                         attach_icons(
                                                             Icons.insert_photo,
                                                             Colors.purple,
-                                                            "Gallery"),
+                                                            "Gallery",
+                                                            () async {
+                                                          file = await _picker
+                                                              .pickImage(
+                                                                  source: ImageSource
+                                                                      .gallery);
+                                                          if(file!=null){
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (builder) =>
+                                                                    CameraViewScreen(
+                                                                      imagePath:
+                                                                      file!.path,
+                                                                      onImageSend:
+                                                                      sendImage,
+                                                                    ),
+                                                                settings:
+                                                                const RouteSettings(
+                                                                    name:
+                                                                    'cameraview'),
+                                                              ),
+                                                            );
+                                                          }
+                                                          else{
+                                                            print("No file selected");
+                                                          }
+                                                        }),
                                                       ],
                                                     ),
                                                     Row(
@@ -333,15 +422,18 @@ class _IndivPageState extends State<IndivPage> {
                                                         attach_icons(
                                                             Icons.headset,
                                                             Colors.orange,
-                                                            "Audio"),
+                                                            "Audio",
+                                                            () {}),
                                                         attach_icons(
                                                             Icons.location_pin,
                                                             Colors.teal,
-                                                            "Location"),
+                                                            "Location",
+                                                            () {}),
                                                         attach_icons(
                                                             Icons.person,
                                                             Colors.blue,
-                                                            "Contacts")
+                                                            "Contacts",
+                                                            () {})
                                                       ],
                                                     )
                                                   ],
@@ -355,10 +447,16 @@ class _IndivPageState extends State<IndivPage> {
                                       IconButton(
                                         onPressed: () {
                                           Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (builder) =>
-                                                      CameraScreen()));
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (builder) =>
+                                                  CameraScreen(
+                                                sendImage: sendImage,
+                                              ),
+                                              settings: const RouteSettings(
+                                                  name: 'camerascreen'),
+                                            ),
+                                          );
                                         },
                                         icon: Icon(Icons.camera_alt),
                                       ),
@@ -387,6 +485,7 @@ class _IndivPageState extends State<IndivPage> {
                                       _textController.text,
                                       widget.source.id!,
                                       widget.chatmodel.id!,
+                                      "",
                                     );
                                     _textController.clear();
                                     setState(() {
@@ -427,14 +526,10 @@ class _IndivPageState extends State<IndivPage> {
     );
   }
 
-  Widget attach_icons(IconData icon, Color color, String text) {
+  Widget attach_icons(
+      IconData icon, Color color, String text, Function() onTap) {
     return InkWell(
-      onTap: () {
-        if (text == "Camera") {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (builder) => CameraScreen()));
-        }
-      },
+      onTap: onTap,
       child: Column(
         children: [
           Padding(

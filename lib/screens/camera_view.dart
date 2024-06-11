@@ -3,14 +3,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 class CameraViewScreen extends StatelessWidget {
+  const CameraViewScreen(
+      {super.key, required this.imagePath, required this.onImageSend});
   final String imagePath;
-
-  const CameraViewScreen({super.key, required this.imagePath});
+  final Function? onImageSend;
+  static TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final ScreenWidth = MediaQuery.of(context).size.width;
     final ScreenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -66,13 +69,14 @@ class CameraViewScreen extends StatelessWidget {
                 width: ScreenWidth,
                 padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                 child: TextFormField(
+                  controller: _controller,
                   maxLines: 6,
                   minLines: 1,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 17,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: "Add Caption...",
                     prefixIcon: Icon(
@@ -80,13 +84,21 @@ class CameraViewScreen extends StatelessWidget {
                       color: Colors.white,
                       size: 27,
                     ),
-                    suffixIcon: CircleAvatar(
-                      backgroundColor: Colors.teal,
-                      radius: 20,
-                      child: Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 27,
+                    suffixIcon: InkWell(
+                      onTap: () {
+                        onImageSend!(imagePath, _controller.text);
+                        Navigator.popUntil(
+                            context, ModalRoute.withName('indivpage'));
+                        _controller.clear();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Colors.teal,
+                        radius: 20,
+                        child: Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 27,
+                        ),
                       ),
                     ),
                     hintStyle: TextStyle(

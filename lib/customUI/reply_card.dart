@@ -12,7 +12,6 @@ class ReplyBox extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: screenWidth - 30),
         child: Card(
-          elevation: 5,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),

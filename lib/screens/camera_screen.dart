@@ -9,7 +9,8 @@ import 'camera_view.dart';
 List<CameraDescription>? camera;
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  const CameraScreen({super.key, this.sendImage});
+  final Function? sendImage;
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -104,10 +105,14 @@ class _CameraScreenState extends State<CameraScreen> {
                               isRecording = false;
                             });
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (builder) => VideoViewScreen(
-                                        videoPath: videoFile.path)));
+                              context,
+                              MaterialPageRoute(
+                                builder: (builder) =>
+                                    VideoViewScreen(videoPath: videoFile.path),
+                                settings:
+                                    const RouteSettings(name: 'videoview'),
+                              ),
+                            );
                           },
                           onTap: () {
                             if (!isRecording) takePhoto(context);
@@ -164,13 +169,15 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void takePhoto(BuildContext context) async {
-    final image = await _cameraController.takePicture();
+    XFile image = await _cameraController.takePicture();
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (builder) => CameraViewScreen(
           imagePath: image.path,
+          onImageSend: widget.sendImage,
         ),
+        settings: const RouteSettings(name: 'cameraview'),
       ),
     );
   }

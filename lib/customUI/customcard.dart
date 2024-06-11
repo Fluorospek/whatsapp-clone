@@ -21,6 +21,7 @@ class CustomCard extends StatelessWidget {
               chatmodel: chatmodel,
               source: source,
             ),
+            settings: const RouteSettings(name: 'indivpage'),
           ),
         );
       },
